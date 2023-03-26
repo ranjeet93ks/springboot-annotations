@@ -4,17 +4,24 @@ import org.springframework.beans.factory.annotation.Autowired;
 //import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.context.annotation.Scope;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 //import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.springbootannotations.config.MailProps;
 import com.springbootannotations.entity.*;
+import com.springbootannotations.exception.AnnotationnsNotFoundException;
 import com.springbootannotations.service.AnnotationService;
 //import com.springbootannotations1.bean1.TestBean1;
 
 @RestController
 @PropertySource("classpath:custom.properties") // to read customized properties file
+@Scope("prototype") // every time url will be hit --controller bean will be created
 public class AnotationsController {
 
 	@Autowired
@@ -54,10 +61,9 @@ public class AnotationsController {
 	private String port;
 	@Value("${message}")
 	private String message; // from custom.properties
-	
-	@Autowired
-    private MailProps mailProps;
 
+	@Autowired
+	private MailProps mailProps;
 
 	// localhost:8080/test
 	@GetMapping("/test")
@@ -66,8 +72,22 @@ public class AnotationsController {
 		annotationService.method();
 		System.out
 				.println("from :" + from + ", " + "to :" + to + ", " + "port : " + port + "," + "message : " + message);
-		System.out.println("mail properties : "+ mailProps);
+		System.out.println("mail properties : " + mailProps);
 		return "pass";
+	}
+
+	// localhost:8080/test1
+	@GetMapping("/test1/{id}")
+	public ResponseEntity<String> method1(@PathVariable int id) throws AnnotationnsNotFoundException {
+		System.out.println("start -->> ");
+		if (id == 500) {
+			System.out.println(
+					"from :" + from + ", " + "to :" + to + ", " + "port : " + port + "," + "message : " + message);
+			return ResponseEntity.ok("pass1");
+		} else {
+			throw new AnnotationnsNotFoundException("from :---->> ");
+		}
+
 	}
 
 }
